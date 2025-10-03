@@ -1,0 +1,31 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+## parameters
+N = 100
+T = np.ones(N+1, float) * 20     ## initial temperature (20°C)
+Tdash = T
+D = 4.25e-6                      ## thermal diffusivity (m²/s)
+h = 1                            ## time step (s)
+a = 0.01                         ## space step (m)
+
+## boundary conditions
+T[0] = 50                        ## left end at 50°C
+T[N] = 0                         ## right end at 0°C
+
+## time evolution loop
+for t in range(10000):
+    for i in range(N+1):
+        if i == 0 or i == N:
+            Tdash[i] = T[i]      ## keep boundaries fixed
+        else:
+            Tdash[i] = T[i] + (h * D / a**2) * (T[i + 1] + T[i - 1] - 2*T[i])
+    T, Tdash = Tdash, T
+
+## plotting
+plt.plot(T, color='r', ls='--')
+plt.xlabel("X (cm)")
+plt.ylabel("Temperature (C$^{\circ}$)")
+plt.title("Time = 10s")
+plt.grid(True)
+plt.show()
