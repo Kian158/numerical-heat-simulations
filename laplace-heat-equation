@@ -1,0 +1,44 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+## constants
+V = 1                 ## boundary potential
+N = 100               ## grid size (N+1 x N+1)
+target = 1e-4         ## convergence threshold
+
+## initialize potential arrays
+phi = np.zeros([N+1, N+1], float)
+phidash = np.zeros([N+1, N+1], float)
+
+## finite difference update function (Jacobi step)
+def eqn7(x, y):
+    return 1/4 * (phi[x+1, y] + phi[x-1, y] + phi[x, y+1] + phi[x, y-1])
+
+## apply boundary conditions
+for i in range(N+1):
+    phi[0][i] = V       # Top boundary
+    phi[N][i] = V       # Bottom boundary
+
+## iterative solver loop
+maxdiff = 2 * target
+while maxdiff > target:
+    for i in range(N+1):
+        for j in range(N+1):
+            if i == 0 or i == N or j == 0 or j == N:
+                phidash[i, j] = phi[i, j]    # Keep boundaries fixed
+            else:
+                phidash[i, j] = eqn7(i, j)   # Update interior points
+    
+    ## compute maximum difference for convergence check
+    delta_df = phi - phidash
+    maxdiff = np.max(np.abs(delta_df))
+    
+    ## swap references for next iteration
+    phi, phidash = phidash, phi
+
+## visualization of final potential
+plt.imshow(phi)
+plt.colorbar()
+plt.jet()
+plt.title("2D Laplace Equation Solution (Potential Field)")
+plt.show()
