@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+## constants
+V = 1
+N = 100
+target = 1e-4
+
+## grid initialization
+phi = np.zeros([N+1, N+1], float)
+phidash = np.zeros([N+1, N+1], float)
+
+## finite difference Laplace update
+def eqn7(x, y):
+    return 1/4 * (phi[x+1, y] + phi[x-1, y] + phi[x, y+1] + phi[x, y-1])
+
+## set fixed "point charges"
+phi[80][80] = V      ## positive potential
+phi[20][20] = -V     ## negative potential
+
+## jacobi iteration
+maxdiff = 2 * target
+while maxdiff > target:
+    for i in range(N+1):
+        for j in range(N+1):
+            if i == 0 or i == N or j == 0 or j == N:
+                phidash[i, j] = phi[i, j]  ## Keep boundary fixed
+            elif (i, j) == (80, 80) or (i, j) == (20, 20):
+                phidash[i, j] = phi[i, j]  ## Keep "charges" fixed
+            else:
+                phidash[i, j] = eqn7(i, j)
+    
+    delta_df = phi - phidash
+    maxdiff = np.max(np.abs(delta_df))
+    phi, phidash = phidash, phi
+
+## plotting the potential surface
+from matplotlib import cm
+
+x = np.arange(0, 101, 1)
+y = np.arange(0, 101, 1)
+X, Y = np.meshgrid(x, y)
+Z = phi[X, Y]
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(X, Y, Z, cmap=cm.jet)
+plt.title("2D Potential Field with Point Charges")
+plt.show()
